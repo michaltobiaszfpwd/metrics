@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up()
     {
-        Schema::create('metrics_entries', function (Blueprint $table) {
+        Schema::create('measurements', function (Blueprint $table) {
             $table->id();
             $table->string('type', 20);
 
@@ -17,7 +17,7 @@ return new class () extends Migration {
 
             $table->timestamp('created_at')->nullable()->useCurrent();
 
-            $table->index(['type', 'name']);
+            $table->index('type');
             $table->index('created_at');
         });
     }

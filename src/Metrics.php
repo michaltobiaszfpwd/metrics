@@ -3,6 +3,7 @@
 namespace GameSpecU\Metrics;
 
 use GameSpecU\Metrics\Enums\Type;
+use GameSpecU\Metrics\Models\Measurement;
 use GameSpecU\Metrics\Monitors\RequestMemMonitor;
 use GameSpecU\Metrics\Monitors\RequestTimeMonitor;
 use Illuminate\Contracts\Foundation\Application;
@@ -17,31 +18,7 @@ class Metrics
         static::storeEntriesAfterResponse($app);
     }
 
-    protected static function storeEntriesAfterResponse(Application $app): void
-    {
-        $app->terminating(function () {
-            static::storeEntries();
-        });
-    }
-
-    protected static function storeEntries(): void
-    {
-        Measurement::insert(static::$measurementsQueue);
-    }
-
-    public static function record(
-        Type $type,
-        ?int $value = null,
-        ?array $context = null
-    ): void {
-        static::$measurementsQueue[] = [
-            'type' => $type,
-            'duration' => $value,
-            'context' => $context,
-        ];
-    }
-
-    protected function registerMonitors($app)
+    protected static function registerMonitors($app)
     {
         $monitors = [
             RequestMemMonitor::class,
@@ -51,5 +28,37 @@ class Metrics
         foreach ($monitors as $monitor) {
             $app->make($monitor)->register($app);
         }
+    }
+
+    protected static function storeEntriesAfterResponse(Application $app): void
+    {
+        $app->terminating(function () {
+            Metrics::storeEntries();
+        });
+    }
+
+    protected static function storeEntries(): void
+    {
+        Measurement::insert(
+            collect(static::$measurementsQueue)->map(function ($measurement) {
+                return [
+                    'type' => $measurement['type'],
+                    'value' => $measurement['value'],
+                    'context' => json_encode($measurement['context']),
+                ];
+            })->toArray());
+    }
+
+    public static function record(
+        Type $type,
+        ?int $value = null,
+        ?array $context = null
+    ): void {
+
+        static::$measurementsQueue[] = [
+            'type' => $type,
+            'value' => $value,
+            'context' => $context,
+        ];
     }
 }

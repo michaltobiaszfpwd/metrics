@@ -11,7 +11,7 @@ class RequestTimeMonitor extends Monitor
     public Type $type = Type::REQUEST_TIME;
     public function register($app): void
     {
-        $this['events']->listen(RequestHandled::class, [$this, 'measure']);
+        $app['events']->listen(RequestHandled::class, [$this, 'measure']);
     }
 
     public function measure(RequestHandled $event): void
