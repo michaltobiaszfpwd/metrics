@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace GameSpecU\Metrics\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class MetricsCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'metrics';
 
     public $description = 'My command';
 
